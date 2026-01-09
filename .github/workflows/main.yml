@@ -24,19 +24,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Map repo
+        id: set-repo
+        run: |
+          REPO="public.ecr.aws/j3y2f7u7/frontend-web"
+          echo "REPO=$REPO" >> $GITHUB_ENV
+
       - name: Login to Public ECR
         run: |
           aws ecr-public get-login-password --region us-east-1 \
             | docker login --username AWS --password-stdin public.ecr.aws
 
-      - name: Build and push to ECR
-        env:
-          ECR_REPO: public.ecr.aws/j3y2f7u7/frontend-web
+      - name: Build & Push Docker Image
         run: |
-          docker build \
-            -f ./Dockerfile \
-            -t $ECR_REPO:latest \
-            -t $ECR_REPO:${GITHUB_SHA} \
+          docker build -f ./Dockerfile \
+            -t $REPO:latest \
+            -t $REPO:${GITHUB_SHA} \
             .
 
-          docker push $ECR_REPO --all-tags
+          docker push $REPO --all-tags
