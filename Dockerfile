@@ -15,4 +15,6 @@ COPY .htaccess /usr/local/apache2/htdocs/.htaccess
 RUN sed -i '/LoadModule rewrite_module/s/^#//g' /usr/local/apache2/conf/httpd.conf && \
     sed -i 's/AllowOverride None/AllowOverride All/g' /usr/local/apache2/conf/httpd.conf
 
+RUN echo "ServerName localhost" >> /usr/local/apache2/conf/httpd.conf
+
 EXPOSE 80
