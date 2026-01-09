@@ -27,7 +27,7 @@ jobs:
       - name: Map repo
         id: set-repo
         run: |
-          REPO="public.ecr.aws/j3y2f7u7/frontend-web"
+          REPO="public.ecr.aws/j3y2f7u7/forntend-web"
           echo "REPO=$REPO" >> $GITHUB_ENV
 
       - name: Login to Public ECR
