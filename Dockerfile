@@ -5,8 +5,14 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM nginx:stable-alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+FROM httpd:alpine
+
+COPY --from=build /app/dist /usr/local/apache2/htdocs/
+
+# Copy .htaccess for React Router support
+COPY .htaccess /usr/local/apache2/htdocs/.htaccess
+
+RUN sed -i '/LoadModule rewrite_module/s/^#//g' /usr/local/apache2/conf/httpd.conf && \
+    sed -i 's/AllowOverride None/AllowOverride All/g' /usr/local/apache2/conf/httpd.conf
+
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
