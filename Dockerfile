@@ -1,20 +1,28 @@
+# Build stage
 FROM node:20-alpine AS build
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install
+
 COPY . .
 RUN npm run build
 
-FROM httpd:alpine
+# Runtime stage
+FROM nginx:alpine
 
-COPY --from=build /app/dist /usr/local/apache2/htdocs/
+# Remove default nginx static files
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copy .htaccess for React Router support
-COPY .htaccess /usr/local/apache2/htdocs/.htaccess
+# Copy React build output
+COPY --from=build /app/dist /usr/share/nginx/html
 
-RUN echo "OK" > /usr/local/apache2/htdocs/health.html
+# Copy custom nginx config for React Router support
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN sed -i '/LoadModule rewrite_module/s/^#//g' /usr/local/apache2/conf/httpd.conf && \
-    sed -i 's/AllowOverride None/AllowOverride All/g' /usr/local/apache2/conf/httpd.conf
-    
+# Health check file
+RUN echo "OK" > /usr/share/nginx/html/health.html
+
 EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
